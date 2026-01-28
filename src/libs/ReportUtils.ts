@@ -9036,8 +9036,10 @@ function isUnread(report: OnyxEntry<Report>, oneTransactionThreadReport: OnyxEnt
         return false;
     }
     // lastVisibleActionCreated and lastReadTime are both datetime strings and can be compared directly
-    const lastVisibleActionCreated = getReportLastVisibleActionCreated(report, oneTransactionThreadReport);
-    const lastReadTime = report.lastReadTime ?? '';
+    const lastVisibleActionCreated = getReportLastVisibleActionCreated(report, oneTransactionThreadReport, isReportArchived);
+    const reportLastReadTime = report.lastReadTime ?? '';
+    const threadLastReadTime = oneTransactionThreadReport?.lastReadTime ?? '';
+    const lastReadTime = reportLastReadTime > threadLastReadTime ? reportLastReadTime : threadLastReadTime;
     const lastMentionedTime = report.lastMentionedTime ?? '';
 
     // If the user was mentioned and the comment got deleted the lastMentionedTime will be more recent than the lastVisibleActionCreated
@@ -12269,10 +12271,24 @@ function getReportLastMessage(reportID: string, isReportArchived: boolean | unde
     return result;
 }
 
-function getReportLastVisibleActionCreated(report: OnyxEntry<Report>, oneTransactionThreadReport: OnyxEntry<Report>) {
+function getReportLastVisibleActionCreated(report: OnyxEntry<Report>, oneTransactionThreadReport: OnyxEntry<Report>, isReportArchived = false) {
     const reportLastVisibleActionCreated = report?.lastVisibleActionCreated ?? '';
+    const reportLastVisibleAction = report?.reportID
+        ? getLastVisibleActionReportActionsUtils(report.reportID, canUserPerformWriteAction(report, isReportArchived))
+        : undefined;
+    const reportLastVisibleActionFromActions = reportLastVisibleAction?.created ?? '';
+    const resolvedReportLastVisibleActionCreated =
+        reportLastVisibleActionFromActions > reportLastVisibleActionCreated ? reportLastVisibleActionFromActions : reportLastVisibleActionCreated;
+
     const threadLastVisibleActionCreated = oneTransactionThreadReport?.lastVisibleActionCreated ?? '';
-    return reportLastVisibleActionCreated > threadLastVisibleActionCreated ? reportLastVisibleActionCreated : threadLastVisibleActionCreated;
+    const threadLastVisibleAction = oneTransactionThreadReport?.reportID
+        ? getLastVisibleActionReportActionsUtils(oneTransactionThreadReport.reportID, canUserPerformWriteAction(oneTransactionThreadReport, isReportArchived))
+        : undefined;
+    const threadLastVisibleActionFromActions = threadLastVisibleAction?.created ?? '';
+    const resolvedThreadLastVisibleActionCreated =
+        threadLastVisibleActionFromActions > threadLastVisibleActionCreated ? threadLastVisibleActionFromActions : threadLastVisibleActionCreated;
+
+    return resolvedReportLastVisibleActionCreated > resolvedThreadLastVisibleActionCreated ? resolvedReportLastVisibleActionCreated : resolvedThreadLastVisibleActionCreated;
 }
 
 function getSourceIDFromReportAction(reportAction: OnyxEntry<ReportAction>): string {

@@ -348,7 +348,7 @@ function ReportActionsList({
 
     const lastActionIndex = lastAction?.reportActionID;
     const reportActionSize = useRef(sortedVisibleReportActions.length);
-    const lastVisibleActionCreated = getReportLastVisibleActionCreated(report, transactionThreadReport);
+    const lastVisibleActionCreated = getReportLastVisibleActionCreated(report, transactionThreadReport, isReportArchived);
     const hasNewestReportAction = lastAction?.created === lastVisibleActionCreated || isReportPreviewAction(lastAction);
     const hasNewestReportActionRef = useRef(hasNewestReportAction);
     hasNewestReportActionRef.current = hasNewestReportAction;

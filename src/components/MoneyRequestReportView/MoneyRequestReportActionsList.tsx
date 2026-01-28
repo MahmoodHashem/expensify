@@ -246,7 +246,7 @@ function MoneyRequestReportActionsList({
     const scrollingVerticalTopOffset = useRef(0);
     const wrapperViewRef = useRef<View>(null);
     const readActionSkipped = useRef(false);
-    const lastVisibleActionCreated = getReportLastVisibleActionCreated(report, transactionThreadReport);
+    const lastVisibleActionCreated = getReportLastVisibleActionCreated(report, transactionThreadReport, isReportArchived);
     const hasNewestReportAction = lastAction?.created === lastVisibleActionCreated;
     const hasNewestReportActionRef = useRef(hasNewestReportAction);
     const userActiveSince = useRef<string>(DateUtils.getDBTime());
